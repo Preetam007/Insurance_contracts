@@ -8,7 +8,7 @@ var fs = require('fs');
 var obj = JSON.parse(fs.readFileSync('./build/contracts/InsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address
-var contractAddress = '0x92dfa0813db2ef4cf020af9d898f273e7e066a20';
+var contractAddress = '0xe15aa91e2b093762fefbea44e65f0c0ac04724e8';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var account = '';
 

@@ -24,6 +24,11 @@ contract InsurancePolicy {
   function InsurancePolicy() {
   }
 
+  // fallback functon, send all ethers as investment
+  function() payable { 
+    this.invest(msg.value);
+  }
+
   // Returns only first policy end date timestamp, should return a list with full insurance policies data
   function getPolicies() constant returns(uint) {
     var userPolicies = insurancePolicies[msg.sender];
@@ -60,8 +65,8 @@ contract InsurancePolicy {
     return true;
   }
 
-  function invest() payable {
-    investedEth[msg.sender] = investedEth[msg.sender] + msg.value;
+  function invest(uint investment) {
+    investedEth[msg.sender] = investedEth[msg.sender] + investment;
   }
 
   function claim() returns (bool) {
