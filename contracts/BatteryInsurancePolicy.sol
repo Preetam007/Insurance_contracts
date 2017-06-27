@@ -6,6 +6,9 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   mapping (address => PolicyData) insurancePolicies;
   mapping (address => uint) investors;
 
+  event Insured(string deviceName, uint insurancePrice);
+  event Claimed(uint payout); 
+
   struct PolicyData {
         DeviceData device;
         uint endDateTimestamp;
@@ -65,6 +68,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
 
     insurancePolicies[msg.sender] = policy;
 
+    Insured(deviceName, msg.value);
     return true;
   }
 
@@ -76,6 +80,8 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     } else {
       if(this.balance > userPolicy.maxPayout) {
         msg.sender.transfer(userPolicy.maxPayout);
+
+        Claimed(userPolicy.maxPayout);
         return true;
       }
 
