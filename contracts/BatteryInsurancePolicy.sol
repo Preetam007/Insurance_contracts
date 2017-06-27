@@ -14,14 +14,15 @@ contract BatteryInsurancePolicy is PolicyInvestable {
         uint endDateTimestamp;
         uint insurancePrice;
         uint maxPayout;
+        bool claimed;
     }
 
-    struct DeviceData {
-      uint itemId;
-      string deviceName;
-      uint deviceYear;
-      uint currentBatteryCapacity;
-    }
+  struct DeviceData {
+    uint itemId;
+    string deviceName;
+    uint deviceYear;
+    uint currentBatteryCapacity;
+  }
 
   function BatteryInsurancePolicy() {
   }
@@ -64,7 +65,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
 
     var deviceData = DeviceData(itemId, deviceName, deviceYear, currentBatteryCapacity);
     uint maxPayout = getMaxPayout();
-    var policy = PolicyData(deviceData, now + 30 days, price, maxPayout);
+    var policy = PolicyData(deviceData, now + 30 days, price, maxPayout, false);
 
     insurancePolicies[msg.sender] = policy;
 
@@ -75,21 +76,24 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   function claim() returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
-    if(userPolicy.endDateTimestamp == 0) {
+    if(userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now) {
       throw;
     } else {
       if(this.balance > userPolicy.maxPayout) {
         msg.sender.transfer(userPolicy.maxPayout);
+        userPolicy.claimed = true;
+        userPolicy.endDateTimestamp = now;
 
         Claimed(userPolicy.maxPayout);
         return true;
       }
-
+      // Due to proposed model this should never happen
       return false;
     }
   }
 
   function getMaxPayout() constant returns (uint price) {
+    // Should calculated and updated dynamically via Oracle
     uint maxPayout = 100 finney;
 
     return maxPayout;
