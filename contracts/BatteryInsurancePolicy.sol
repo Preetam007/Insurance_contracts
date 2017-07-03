@@ -148,7 +148,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     insurancePolicies[policyOwner].confirmed = true;
   }
 
-  function claim() returns (bool) {
+  function claim(uint wearLevel) returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
     if(userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now || insurancePolicies[msg.sender].confirmed) {

@@ -10,7 +10,6 @@ var abiArray = obj.abi;
 // Insurance policy contract address
 var contractAddress = '0xe15aa91e2b093762fefbea44e65f0c0ac04724e8';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
-var account = '';
 
 app.get('/balance/:address', function (req, res) {
   var balance = web3.eth.getBalance(req.params.address).toNumber()
@@ -41,29 +40,36 @@ app.get('/register', function (req, res) {
   }
 });
 
-app.get('/insurancePrice/:address/:batteryCapacity', function (req, res) {
-  account = req.params.address;
-  var result = policyContract.policyPrice(req.params.batteryCapacity);
+app.get('/insurancePrice/:address', function (req, res) {
+  var account = req.params.address;
+  var deviceBrand = req.query.deviceBrand;
+  var deviceYear = req.query.deviceYear;
+  var wearLevel = req.query.wearLevel;
+  var region = req.query.region;
+  var result = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region);
   res.send('' + result);
 })
 
-app.get('/maxPayout/:address/', function (req, res) {
-  account = req.params.address;
-  var result = policyContract.getMaxPayout();
+app.get('/maxPayout', function (req, res) {
+  var account = req.params.address;
+  var result = policyContract.maxPayout();
   res.send('' + result);
 })
 
 app.get('/insure/:address/', function (req, res) {
-  account = req.params.address;
+  var account = req.params.address;
   var itemId = req.query.itemId;
+  var deviceBrand = req.query.deviceBrand;
   var deviceYear = req.query.deviceYear;
-  var currentBatteryCapacity = req.query.currentBatteryCapacity;
-  var deviceName = req.query.deviceName;
+  var wearLevel = req.query.wearLevel;
+  var region = req.query.region;
+  var policyMonthlyPayment = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region) / 12;
 
   console.log(itemId + ' ' + deviceYear + ' ' + currentBatteryCapacity + ' ' + deviceName + ' ');
-  console.log(policyContract.policyPrice(currentBatteryCapacity));
 
-  policyContract.insure(itemId, deviceYear, currentBatteryCapacity, deviceName, {value: policyContract.policyPrice(currentBatteryCapacity), gas: 2000000, from: account}, function(err, result) {
+  policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
+    {value: policyMonthlyPayment, gas: 2000000, from: account}, 
+   function(err, result) {
     if(err) {
       console.log(err);
       res.send('' + false);
@@ -78,6 +84,9 @@ app.get('/insure/:address/', function (req, res) {
           if (confirmedBlock.transactions.length > 0) {
               let transaction = web3.eth.getTransaction(txId);
               if (transaction.from == account) {
+
+                // confirmation transaction is needed from OWNER
+
                 res.send(txId);
               } else{
                 res.send('' + false);
@@ -93,16 +102,32 @@ app.get('/insure/:address/', function (req, res) {
 })
 
 app.get('/policyEndDate/:address', function (req, res) {
-  account = req.params.address;
+  var account = req.params.address;
 
-  var result = policyContract.getPolicyEndDate({from: account}) + '';
+  var result = policyContract.insurancePolicies(account).endDateTimestamp;
+  res.send('' + result);
+})
+
+app.get('/claimed/:address', function (req, res) {
+  var account = req.params.address;
+
+  var result = policyContract.insurancePolicies(account).claimed;
+  res.send('' + result);
+})
+
+app.get('/nextPayment/:address', function (req, res) {
+  var account = req.params.address;
+
+  var result = policyContract.insurancePolicies(account).nextPaymentTimestamp;
   res.send('' + result);
 })
 
 // Not secure, it should come trusted authority, probably as an Oracle directly to smart contract
 app.get('/claim/:address', function (req, res) {
-  account = req.params.address;
-  var txHash = policyContract.claim({gas: 200000, from: account}, function(err, result) {
+  var account = req.params.address;
+  var wearLevel = req.query.wearLevel;
+
+  var txHash = policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
     if(err) {
       console.log(err);
       res.send('' + false);
