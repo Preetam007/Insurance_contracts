@@ -19,21 +19,26 @@ app.get('/balance/:address', function (req, res) {
 })
 
 app.get('/register', function (req, res) {
-  // Password should be used the one provided by user and secured
-  web3.personal.newAccount("tempPass", function(err, acc) {
-    if(!err) {
-      web3.personal.unlockAccount(acc, "tempPass", function(err, result) {
-        if(result) {
-          res.send('Unlocked: ' + acc);
-        } else {
-          res.send('' + false);
-        }  
-      });
-    }
-    else {
-      res.send('' + false);
-    }    
-  });
+  if(req.body.password) {
+      // Password should be used the one provided by user and secured
+    web3.personal.newAccount(req.body.password, function(err, acc) {
+      if(!err) {
+        web3.personal.unlockAccount(acc, req.body.password, function(err, result) {
+          if(result) {
+            res.send('Unlocked: ' + acc);
+          } else {
+            res.send('' + false);
+          }  
+        });
+      }
+      else {
+        res.send('' + false);
+      }    
+    });
+  }
+  else {
+    res.send('' + false);
+  }
 });
 
 app.get('/insurancePrice/:address/:batteryCapacity', function (req, res) {
@@ -42,9 +47,9 @@ app.get('/insurancePrice/:address/:batteryCapacity', function (req, res) {
   res.send('' + result);
 })
 
-app.get('/maxPayout/:address/:deviceYear', function (req, res) {
+app.get('/maxPayout/:address/', function (req, res) {
   account = req.params.address;
-  var result = policyContract.calculateMaxPayout(req.params.deviceYear);
+  var result = policyContract.getMaxPayout();
   res.send('' + result);
 })
 
@@ -73,7 +78,7 @@ app.get('/insure/:address/', function (req, res) {
           if (confirmedBlock.transactions.length > 0) {
               let transaction = web3.eth.getTransaction(txId);
               if (transaction.from == account) {
-                res.send('' + true);
+                res.send(txId);
               } else{
                 res.send('' + false);
               }
@@ -87,22 +92,22 @@ app.get('/insure/:address/', function (req, res) {
 
 })
 
-app.get('/insurancePolicies/:address', function (req, res) {
+app.get('/policyEndDate/:address', function (req, res) {
   account = req.params.address;
 
-  var result = policyContract.getPolicies({from: account}) + '';
+  var result = policyContract.getPolicyEndDate({from: account}) + '';
   res.send('' + result);
 })
 
 // Not secure, it should come trusted authority, probably as an Oracle directly to smart contract
 app.get('/claim/:address', function (req, res) {
   account = req.params.address;
-  policyContract.claim({gas: 200000, from: account}, function(err, result) {
+  var txHash = policyContract.claim({gas: 200000, from: account}, function(err, result) {
     if(err) {
       console.log(err);
       res.send('' + false);
     } else {
-      res.send('' + true);
+      res.send(txHash);
     }
     
   });

@@ -3,8 +3,23 @@ pragma solidity ^0.4.10;
 import "./PolicyInvestable.sol";
 
 contract BatteryInsurancePolicy is PolicyInvestable { 
-  mapping (address => PolicyData) insurancePolicies;
+
+  // Investment data
   mapping (address => uint) investors;
+  uint totalInvestorsCount;
+  uint totalInvestedAmount;
+  uint totalInsurers;
+  uint totalClaimsPaid;
+
+  // Insurance data
+  mapping (address => PolicyData) insurancePolicies;
+  mapping (string => mapping(string => uint) ) insuranceParameters;
+  uint basePremium;
+  uint maxPayout;
+  uint loading;
+
+  // Owner is used to confirm policies and claims which came via our server
+  address owner;
 
   event Insured(string deviceName, uint insurancePrice);
   event Claimed(uint payout); 
@@ -12,19 +27,66 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   struct PolicyData {
         DeviceData device;
         uint endDateTimestamp;
-        uint insurancePrice;
+        uint nextPaymentTimestamp;
+        uint monthlyPayment;
         uint maxPayout;
+        uint totalPrice;
+        string region;
         bool claimed;
+        bool confirmed;
     }
 
   struct DeviceData {
     uint itemId;
-    string deviceName;
-    uint deviceYear;
-    uint currentBatteryCapacity;
+    string deviceBrand;
+    string deviceYear;
+    string batteryWearLevel;
   }
 
-  function BatteryInsurancePolicy() {
+  function BatteryInsurancePolicy() payable {
+    // Initial funds
+    investors[msg.sender] = investors[msg.sender] + msg.value;
+    totalInvestorsCount++;
+    totalInvestedAmount = totalInvestedAmount + msg.value;
+    Invested(msg.value);
+
+    owner = msg.sender;
+
+    setInitialInsuranceParameters();
+  }
+
+  function setInitialInsuranceParameters() internal {
+    // Device brand
+    insuranceParameters['deviceBrand']['apple'] = 100;
+    insuranceParameters['deviceBrand']['samsung'] = 110;
+    insuranceParameters['deviceBrand']['default'] = 120;
+
+    // Device year
+    insuranceParameters['deviceYear']['2014'] = 120;
+    insuranceParameters['deviceYear']['2015'] = 110;
+    insuranceParameters['deviceYear']['2016'] = 100;
+    insuranceParameters['deviceYear']['2017'] = 100;
+    insuranceParameters['deviceYear']['default'] = 140;
+
+    // Battery wear level upper than
+    insuranceParameters['wearLevel']['70'] = 120;
+    insuranceParameters['wearLevel']['80'] = 110;
+    insuranceParameters['wearLevel']['90'] = 100;
+
+    // Region
+    insuranceParameters['region']['usa'] = 100;
+    insuranceParameters['region']['europe'] = 100;
+    insuranceParameters['region']['africa'] = 120;
+    insuranceParameters['region']['default'] = 130;
+
+    // Base premium (0.02 ETH)
+    basePremium = 20000000000000000;
+
+    // Max payout (0.4 ETH)
+    maxPayout = 400000000000000000;
+
+    // Loading percentage (expenses, etc)
+    loading = 50;
   }
 
   // fallback functon, send all ethers as investment
@@ -38,75 +100,72 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     }
 
     investors[msg.sender] = investors[msg.sender] + msg.value;
+    totalInvestorsCount++;
+    totalInvestedAmount = totalInvestedAmount + msg.value;
     Invested(msg.value);
     return true;
   }
 
-  function getInvestment() constant returns(uint) {
-    return investors[msg.sender];
-  }
-
 
   // More parameters should be included
-  function policyPrice(uint currentBatteryCapacity) constant returns(uint price) {
-    uint basePrice = 10 finney;
-    uint oneFinney = 1 finney;
-    uint premium = ((100 - currentBatteryCapacity) / 2) * oneFinney;
-    uint policyPrice = basePrice + premium;
-    return policyPrice;
+  function policyPrice(string deviceBrand, string deviceYear, string wearLevel, string region) constant returns(uint price) {
+    uint deviceBrandMultiplier = insuranceParameters['deviceBrand'][deviceBrand];
+    uint deviceYearMultiplier = insuranceParameters['deviceYear'][deviceYear];
+    uint batteryWearLevelMultiplier = insuranceParameters['wearLevel'][wearLevel];
+    uint regionMultiplier = insuranceParameters['region'][region];
+
+    // / 100 is due to Solidity not supporting doubles
+    uint riskPremium = basePremium * deviceBrandMultiplier / 100 * deviceYearMultiplier / 100 
+                        * batteryWearLevelMultiplier / 100 * regionMultiplier / 100;
+
+    uint officePremium = riskPremium / (100 - loading) * 100; 
+    return officePremium;
   }
 
 
-  function insure(uint itemId, uint deviceYear, uint currentBatteryCapacity, string deviceName) payable returns (bool insured) {
-    uint price = policyPrice(currentBatteryCapacity);
-    if (msg.value < price) {
+  function insure(uint itemId, string deviceBrand, string deviceYear, string wearLevel, string region) payable returns (bool insured) {
+    uint totalPrice = policyPrice(deviceBrand, deviceYear, wearLevel, region);
+    uint monthlyPayment = totalPrice / 12;
+    if (msg.value < monthlyPayment) {
       throw;
     }
 
-    var deviceData = DeviceData(itemId, deviceName, deviceYear, currentBatteryCapacity);
-    uint maxPayout = getMaxPayout();
-    var policy = PolicyData(deviceData, now + 30 days, price, maxPayout, false);
+    var deviceData = DeviceData(itemId, deviceBrand, deviceYear, wearLevel);
+    var policy = PolicyData(deviceData, now + 1 years, now + 30 days, monthlyPayment, maxPayout, totalPrice, region, false, false);
 
     insurancePolicies[msg.sender] = policy;
+    totalInsurers = totalInsurers + 1;
 
-    Insured(deviceName, msg.value);
+    Insured(deviceBrand, msg.value);
     return true;
+  }
+
+  function confirmPolicy(address policyOwner) {
+    if(owner != msg.sender) {
+      throw;
+    }
+
+    insurancePolicies[policyOwner].confirmed = true;
   }
 
   function claim() returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
-    if(userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now) {
+    if(userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now || insurancePolicies[msg.sender].confirmed) {
       throw;
     } else {
       if(this.balance > userPolicy.maxPayout) {
         msg.sender.transfer(userPolicy.maxPayout);
         userPolicy.claimed = true;
         userPolicy.endDateTimestamp = now;
+        userPolicy.nextPaymentTimestamp = 0;
 
+        totalClaimsPaid = totalClaimsPaid + userPolicy.maxPayout;
         Claimed(userPolicy.maxPayout);
         return true;
       }
       // Due to proposed model this should never happen
       return false;
-    }
-  }
-
-  function getMaxPayout() constant returns (uint price) {
-    // Should calculated and updated dynamically via Oracle
-    uint maxPayout = 100 finney;
-
-    return maxPayout;
-  }
-
-    // Returns policy end date timestamp
-  function getPolicyEndDate() constant returns(uint) {
-    var userPolicy = insurancePolicies[msg.sender];
-    if (userPolicy.endDateTimestamp != 0) {
-      return (userPolicy.endDateTimestamp);
-    }
-    else {
-      return 0;
     }
   }
 
