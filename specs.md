@@ -5,7 +5,7 @@ Steps:
 <b>1. Registration.</b><br/>
 Method type: POST<br/>
 URL: /register<br/>
-Request example:
+Request body example:
 ```
 {
 	"password": "0a2i84a..." // password hash
@@ -20,7 +20,7 @@ Response example:
 <b>2. Check account balance.</b><br/>
 Method type: GET<br/>
 URL: balance/:address <br/>
-Request example: 
+Request body example: 
 -
 
 Response example:
@@ -32,39 +32,48 @@ Response example:
 <b>3. Send testnet Ethers.</b><br/>
 Method type: GET <br/>
 URL: sendTestnetEthers/:address <br/>
-Request example:
-```
+Request body example:
 -
-```
 Response example:
 ```
 0x0cd67e71c298fde80c27a349ca5909e6091983b0a9dbae22ba8c96e2ef60a0fd // transaction id
 ```
 <br/>
 <br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
-
+<b>4. Policy yearly price.</b><br/>
+Method type: POST<br/>
+URL: /insurancePrice/:address<br/>
+Request body example:
+```
+{
+  "deviceBrand": "apple",
+  "deviceYear": "2015",
+  "wearLevel": "70",
+  "region": "africa"
+}
 ```
 Response example:
-```json
-
+```
+400000000 // amount in WEI
 ```
 <br/>
 <br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
-
+<b>5. Insure.</b><br/>
+Method type: POST<br/>
+URL: /insure/:address<br/>
+Request body example:
+```
+{
+  "itemId": "112312132",
+  "deviceBrand": "apple",
+  "deviceYear": "2015",
+  "wearLevel": "70",
+  "region": "africa"
+}
 ```
 Response example:
-```json
-
+```
+0x9ba9f6fb21cb17d6dabebcb7ad6e66a919fddfcb1353cd2ea73fc7c0b9dc185a // transaction id
 ```
 <br/>
 <br/>
