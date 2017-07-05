@@ -22,7 +22,7 @@ Method type: GET<br/>
 URL: balance/:address <br/>
 Request example: 
 ```
--
+
 ```
 Response example:
 ```
