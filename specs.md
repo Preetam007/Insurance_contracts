@@ -6,7 +6,7 @@ Steps:
 Method type: POST
 URL: /register
 Request example:
-```json
+```
 {
 	"password": "0a2i84a..." // password hash
 }
