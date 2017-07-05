@@ -77,53 +77,52 @@ Response example:
 ```
 <br/>
 <br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
+<b>6. Policy end timestamp.</b><br/>
+Method type: GET <br/>
+URL: policyEndDate/:address <br/>
+Request body example:
+-
+Response example:
+```
+1530727689
+```
 
+<br/>
+<br/>
+<b>7. Next payment timestamp.</b><br/>
+Method type: GET <br/>
+URL: nextPayment/:address <br/>
+Request body example:
+-
+Response example:
+```
+1530727689
+```
+
+<br/>
+<br/>
+<b>8. Claimed.</b><br/>
+Method type: GET <br/>
+URL: claimed/:address <br/>
+Request body example:
+-
+Response example:
+```
+true
+```
+
+<br/>
+<br/>
+<b>9. Claim.</b><br/>
+Method type: POST <br/>
+URL: claim/:address <br/>
+Request body example:
+```
+{
+  "wearLevel": "30"
+}
 ```
 Response example:
-```json
-
 ```
-<br/>
-<br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
-
-```
-Response example:
-```json
-
-```
-<br/>
-<br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
-
-```
-Response example:
-```json
-
-```
-<br/>
-<br/>
-<b>2. Check account balance.</b><br/>
-Method type: <br/>
-URL: <br/>
-Request example:
-```json
-
-```
-Response example:
-```json
-
+0x94bf16d14ddb3f1f522f0968a3cc74f63468c25830b2e9e64525797396c823b1 // transaction id
 ```
