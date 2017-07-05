@@ -5,17 +5,17 @@ import "./PolicyInvestable.sol";
 contract BatteryInsurancePolicy is PolicyInvestable { 
 
   // Investment data
-  mapping (address => uint) investors;
-  uint totalInvestorsCount;
-  uint totalInvestedAmount;
-  uint totalInsurers;
-  uint totalClaimsPaid;
+  mapping (address => uint) public investors;
+  uint public totalInvestorsCount;
+  uint public totalInvestedAmount;
+  uint public totalInsurers;
+  uint public totalClaimsPaid;
 
   // Insurance data
   mapping (address => PolicyData) insurancePolicies;
   mapping (string => mapping(string => uint) ) insuranceParameters;
-  uint basePremium;
-  uint maxPayout;
+  uint public basePremium;
+  uint public maxPayout;
   uint loading;
 
   // Owner is used to confirm policies and claims which came via our server
@@ -34,7 +34,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
         string region;
         bool claimed;
         bool confirmed;
-    }
+  }
 
   struct DeviceData {
     uint itemId;
@@ -151,7 +151,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   function claim(uint wearLevel) returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
-    if(userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now || insurancePolicies[msg.sender].confirmed) {
+    if(wearLevel > 70 || userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now || insurancePolicies[msg.sender].confirmed) {
       throw;
     } else {
       if(this.balance > userPolicy.maxPayout) {
@@ -168,5 +168,21 @@ contract BatteryInsurancePolicy is PolicyInvestable {
       return false;
     }
   }
+
+  function getPolicyEndDateTimestamp() constant returns (uint) {
+    return insurancePolicies[msg.sender].endDateTimestamp;
+  }
+
+  function getPolicyNextPayment() constant returns (uint) {
+    return insurancePolicies[msg.sender].nextPaymentTimestamp;
+  }
+
+  function claimed() constant returns (bool) {
+    return insurancePolicies[msg.sender].claimed;
+  }
+
+
+
+
 
 }

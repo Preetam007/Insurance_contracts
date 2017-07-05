@@ -1,5 +1,5 @@
-var InsurancePolicy = artifacts.require("./InsurancePolicy.sol");
+var BatteryInsurancePolicy = artifacts.require("./BatteryInsurancePolicy.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(InsurancePolicy);
+  deployer.deploy(BatteryInsurancePolicy);
 };

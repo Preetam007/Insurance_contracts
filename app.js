@@ -2,14 +2,20 @@ const Web3 = require('web3')
 const express = require('express')
 const app = express()
 
-const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8546"));
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded b
+
+const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 
 var fs = require('fs');
-var obj = JSON.parse(fs.readFileSync('./build/contracts/InsurancePolicy.json', 'utf8'));
+var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address
-var contractAddress = '0xe15aa91e2b093762fefbea44e65f0c0ac04724e8';
+var contractAddress = '0x3da52a228c20f62320b5b1b9b7dcc2d1ba777c2c';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
+var adminAccount = '0x28122b2683b941683e948d9434b679e15740b3c0';
+var adminPass = 'jajaja';
 
 app.get('/balance/:address', function (req, res) {
   var balance = web3.eth.getBalance(req.params.address).toNumber()
@@ -17,7 +23,25 @@ app.get('/balance/:address', function (req, res) {
   res.send('' + balanceInEth);
 })
 
-app.get('/register', function (req, res) {
+app.get('/sendTestnetEthers/:address', function (req, res) {
+  var account = req.params.address;
+
+  web3.personal.unlockAccount(adminAccount, adminPass, function(err, result) {
+    web3.eth.sendTransaction({value: 30000000000000000, 
+      gas: 2000000, from: adminAccount, to: account}, function(err, result) {
+      if(err) {
+        console.log(err);
+        res.send('' + false);
+      } else {
+        txId = result;
+        res.send('' + txId);
+      }
+    });
+  });
+})
+
+app.post('/register', function (req, res) {
+  // password hash
   if(req.body.password) {
       // Password should be used the one provided by user and secured
     web3.personal.newAccount(req.body.password, function(err, acc) {
@@ -40,32 +64,31 @@ app.get('/register', function (req, res) {
   }
 });
 
-app.get('/insurancePrice/:address', function (req, res) {
+app.post('/insurancePrice/:address', function (req, res) {
   var account = req.params.address;
-  var deviceBrand = req.query.deviceBrand;
-  var deviceYear = req.query.deviceYear;
-  var wearLevel = req.query.wearLevel;
-  var region = req.query.region;
+  var deviceBrand = req.body.deviceBrand;
+  var deviceYear = req.body.deviceYear;
+  var wearLevel = req.body.wearLevel;
+  var region = req.body.region;
+
   var result = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region);
   res.send('' + result);
 })
 
 app.get('/maxPayout', function (req, res) {
   var account = req.params.address;
-  var result = policyContract.maxPayout();
+  var result = policyContract.maxPayout.call();
   res.send('' + result);
 })
 
-app.get('/insure/:address/', function (req, res) {
+app.post('/insure/:address/', function (req, res) {
   var account = req.params.address;
-  var itemId = req.query.itemId;
-  var deviceBrand = req.query.deviceBrand;
-  var deviceYear = req.query.deviceYear;
-  var wearLevel = req.query.wearLevel;
-  var region = req.query.region;
+  var itemId = req.body.itemId;
+  var deviceBrand = req.body.deviceBrand;
+  var deviceYear = req.body.deviceYear;
+  var wearLevel = req.body.wearLevel;
+  var region = req.body.region;
   var policyMonthlyPayment = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region) / 12;
-
-  console.log(itemId + ' ' + deviceYear + ' ' + currentBatteryCapacity + ' ' + deviceName + ' ');
 
   policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
     {value: policyMonthlyPayment, gas: 2000000, from: account}, 
@@ -104,35 +127,35 @@ app.get('/insure/:address/', function (req, res) {
 app.get('/policyEndDate/:address', function (req, res) {
   var account = req.params.address;
 
-  var result = policyContract.insurancePolicies(account).endDateTimestamp;
-  res.send('' + result);
-})
-
-app.get('/claimed/:address', function (req, res) {
-  var account = req.params.address;
-
-  var result = policyContract.insurancePolicies(account).claimed;
+  var result = policyContract.getPolicyEndDateTimestamp({from: account});
   res.send('' + result);
 })
 
 app.get('/nextPayment/:address', function (req, res) {
   var account = req.params.address;
 
-  var result = policyContract.insurancePolicies(account).nextPaymentTimestamp;
+  var result = policyContract.getPolicyNextPayment({from: account});
+  res.send('' + result);
+})
+
+app.get('/claimed/:address', function (req, res) {
+  var account = req.params.address;
+
+  var result = policyContract.claimed({from: account});
   res.send('' + result);
 })
 
 // Not secure, it should come trusted authority, probably as an Oracle directly to smart contract
-app.get('/claim/:address', function (req, res) {
+app.post('/claim/:address', function (req, res) {
   var account = req.params.address;
-  var wearLevel = req.query.wearLevel;
+  var wearLevel = req.body.wearLevel;
 
-  var txHash = policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
+  policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
     if(err) {
       console.log(err);
       res.send('' + false);
     } else {
-      res.send(txHash);
+      res.send(result);
     }
     
   });
