@@ -13,14 +13,14 @@ Request example:
 ```
 Response example:
 ```
-0xfd95028685f3cd56d038a5aa19d0030cc116bbe0. // Ethereum wallet id
+0xfd95028685f3cd56d038a5aa19d0030cc116bbe0 // Ethereum wallet id
 ```
 <br/>
 <br/>
 <b>2. Check account balance.</b><br/>
 Method type: GET<br/>
 URL: balance/:address <br/>
-Request example:
+Request example: 
 ```
 -
 ```
