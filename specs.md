@@ -21,7 +21,7 @@ Response example:
 Method type: GET<br/>
 URL: balance/:address <br/>
 Request body example: 
--
+None
 
 Response example:
 ```
@@ -33,7 +33,8 @@ Response example:
 Method type: GET <br/>
 URL: sendTestnetEthers/:address <br/>
 Request body example:
--
+None
+
 Response example:
 ```
 0x0cd67e71c298fde80c27a349ca5909e6091983b0a9dbae22ba8c96e2ef60a0fd // transaction id
@@ -43,6 +44,7 @@ Response example:
 <b>4. Policy yearly price.</b><br/>
 Method type: POST<br/>
 URL: /insurancePrice/:address<br/>
+
 Request body example:
 ```
 {
@@ -52,6 +54,7 @@ Request body example:
   "region": "africa"
 }
 ```
+
 Response example:
 ```
 400000000 // amount in WEI
@@ -61,6 +64,7 @@ Response example:
 <b>5. Insure.</b><br/>
 Method type: POST<br/>
 URL: /insure/:address<br/>
+
 Request body example:
 ```
 {
@@ -71,6 +75,7 @@ Request body example:
   "region": "africa"
 }
 ```
+
 Response example:
 ```
 0x9ba9f6fb21cb17d6dabebcb7ad6e66a919fddfcb1353cd2ea73fc7c0b9dc185a // transaction id
@@ -81,7 +86,8 @@ Response example:
 Method type: GET <br/>
 URL: policyEndDate/:address <br/>
 Request body example:
--
+None
+
 Response example:
 ```
 1530727689
@@ -93,7 +99,8 @@ Response example:
 Method type: GET <br/>
 URL: nextPayment/:address <br/>
 Request body example:
--
+None
+
 Response example:
 ```
 1530727689
@@ -105,7 +112,8 @@ Response example:
 Method type: GET <br/>
 URL: claimed/:address <br/>
 Request body example:
--
+None
+
 Response example:
 ```
 true
@@ -116,12 +124,14 @@ true
 <b>9. Claim.</b><br/>
 Method type: POST <br/>
 URL: claim/:address <br/>
+
 Request body example:
 ```
 {
   "wearLevel": "30"
 }
 ```
+
 Response example:
 ```
 0x94bf16d14ddb3f1f522f0968a3cc74f63468c25830b2e9e64525797396c823b1 // transaction id
