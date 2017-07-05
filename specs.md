@@ -21,9 +21,8 @@ Response example:
 Method type: GET<br/>
 URL: balance/:address <br/>
 Request example: 
-```
+-
 
-```
 Response example:
 ```
 0.09287612
