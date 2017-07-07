@@ -25,20 +25,28 @@ app.get('/balance/:address', function (req, res) {
   res.send('' + balanceInEth);
 })
 
-app.get('/sendTestnetEthers/:address', function (req, res) {
+app.post('/sendTestnetEthers/:address', function (req, res) {
   var account = req.params.address;
 
-  web3.personal.unlockAccount(adminAccount, adminPass, function(err, result) {
-    web3.eth.sendTransaction({value: 30000000000000000, 
-      gas: 2000000, from: adminAccount, to: account}, function(err, result) {
-      if(err) {
-        console.log(err);
-        res.send('' + false);
-      } else {
-        txId = result;
-        res.send('' + txId);
-      }
-    });
+  web3.personal.unlockAccount(account, req.body.password, 4, function(err, accResult) {
+    if(accResult) {    
+    // unlocking admin account for ethers sending
+      web3.personal.unlockAccount(adminAccount, adminPass, 4, function(err, adminAccResult) {
+        web3.eth.sendTransaction({value: 30000000000000000, 
+          gas: 2000000, from: adminAccount, to: account}, function(err, result) {
+          if(err) {
+            console.log(err);
+            res.send(false);
+          } else {
+            var txId = result;
+            res.send('' + txId);
+          }
+        });
+      });
+    } else {
+      console.log(err);
+      res.send(false);
+    }  
   });
 })
 
@@ -48,9 +56,9 @@ app.post('/register', function (req, res) {
       // Password should be used the one provided by user and secured
     web3.personal.newAccount(req.body.password, function(err, acc) {
       if(!err) {
-        web3.personal.unlockAccount(acc, req.body.password, function(err, result) {
+        web3.personal.unlockAccount(acc, req.body.password, 2, function(err, result) {
           if(result) {
-            res.send('Unlocked: ' + acc);
+            res.send(acc);
           } else {
             res.send('' + false);
           }  
@@ -92,38 +100,43 @@ app.post('/insure/:address/', function (req, res) {
   var region = req.body.region;
   var policyMonthlyPayment = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region) / 12;
 
-  policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
-    {value: policyMonthlyPayment, gas: 2000000, from: account}, 
-   function(err, result) {
-    if(err) {
-      console.log(err);
-      res.send('' + false);
-    } else {
-      txId = result;
+  web3.personal.unlockAccount(account, req.body.password, 2, function(err, result) {
+    if(result) {
+      policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
+        {value: policyMonthlyPayment, gas: 2000000, from: account}, 
+       function(err, result) {
+        if(err) {
+          console.log(err);
+          res.send('' + false);
+        } else {
+          var txId = result;
 
-      let filter = web3.eth.filter('latest')
-      filter.watch(function(error, result) {
-        console.log(error);
-        if (!error) {
-          let confirmedBlock = web3.eth.getBlock(web3.eth.blockNumber - 1)
-          if (confirmedBlock.transactions.length > 0) {
-              let transaction = web3.eth.getTransaction(txId);
-              if (transaction.from == account) {
+          let filter = web3.eth.filter('latest')
+          filter.watch(function(error, result) {
+            console.log(error);
+            if (!error) {
+              let confirmedBlock = web3.eth.getBlock(web3.eth.blockNumber - 1)
+              if (confirmedBlock.transactions.length > 0) {
+                  let transaction = web3.eth.getTransaction(txId);
+                  if (transaction.from == account) {
 
-                // confirmation transaction is needed from OWNER
+                    // confirmation transaction is needed from OWNER
 
-                res.send(txId);
-              } else{
-                res.send('' + false);
+                    res.send(txId);
+                  } else{
+                    res.send('' + false);
+                  }
+                  filter.stopWatching();
               }
-              filter.stopWatching();
-          }
+            }
+          });
         }
+        
       });
-    }
-    
+    } else {
+      res.send('' + false);
+    }  
   });
-
 })
 
 app.get('/policyEndDate/:address', function (req, res) {
@@ -152,14 +165,21 @@ app.post('/claim/:address', function (req, res) {
   var account = req.params.address;
   var wearLevel = req.body.wearLevel;
 
-  policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
-    if(err) {
-      console.log(err);
-      res.send('' + false);
+  web3.personal.unlockAccount(account, req.body.password, 2, function(err, result) {
+    if(result) {    
+      policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
+        if(err) {
+          console.log(err);
+          res.send('' + false);
+        } else {
+          var txId = result;
+          res.send(txId);
+        }
+        
+      });
     } else {
-      res.send(result);
-    }
-    
+      res.send('' + false);
+    }  
   });
 })
 
