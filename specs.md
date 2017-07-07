@@ -33,7 +33,12 @@ Response example:
 Method type: GET <br/>
 URL: sendTestnetEthers/:address <br/>
 Request body example:
-None
+
+```
+{
+  "password": "334fmekrmm43534" // password hash
+}
+```
 
 Response example:
 ```
@@ -68,6 +73,7 @@ URL: /insure/:address<br/>
 Request body example:
 ```
 {
+  "password": "334fmekrmm43534", // password hash
   "itemId": "112312132",
   "deviceBrand": "apple",
   "deviceYear": "2015",
@@ -128,7 +134,8 @@ URL: claim/:address <br/>
 Request body example:
 ```
 {
-  "wearLevel": "30"
+  "wearLevel": "30",
+  "password": "334fmekrmm43534" // password hash
 }
 ```
 
