@@ -16,8 +16,8 @@ var abiArray = obj.abi;
 // Insurance policy contract address
 var contractAddress = '0x3da52a228c20f62320b5b1b9b7dcc2d1ba777c2c';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
-var adminAccount = '0x28122b2683b941683e948d9434b679e15740b3c0';
-var adminPass = 'jajaja';
+var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
+var adminPass = 'adminPassword1234Temp';
 
 app.get('/balance/:address', function (req, res) {
   var balance = web3.eth.getBalance(req.params.address).toNumber()
