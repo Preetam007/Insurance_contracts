@@ -2,15 +2,23 @@
 
 const Web3 = require('web3')
 const express = require('express')
+const https = require('https');
+const fs = require('fs');
 const app = express()
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded b
+app.use(require('helmet')()); // security for https
+
+// Set up express server here
+const options = {
+    cert: fs.readFileSync('../sslcerts/fullchain.pem'),
+    key: fs.readFileSync('../sslcert/privkey.pem')
+};
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 
-var fs = require('fs');
 var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address Ropsten testnet
@@ -60,16 +68,19 @@ app.post('/register', function (req, res) {
           if(result) {
             res.send(acc);
           } else {
+            res.status(400);
             res.send('' + false);
           }  
         });
       }
       else {
+        res.status(400);
         res.send('' + false);
       }    
     });
   }
   else {
+    res.status(400);
     res.send('' + false);
   }
 });
@@ -109,6 +120,7 @@ app.post('/insure/:address/', function (req, res) {
        function(err, result) {
         if(err) {
           console.log(err);
+          res.status(400);
           res.send('1' + err);
         } else {
           var txIdinsure = result;
@@ -129,6 +141,7 @@ app.post('/insure/:address/', function (req, res) {
                         policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
                           if(err) {
                             console.log(err);
+                            res.status(400);
                             res.send('2' + err);
                           } else {
                             res.send(txIdinsure);
@@ -136,12 +149,14 @@ app.post('/insure/:address/', function (req, res) {
                           
                         });
                       } else {
+                        res.status(400);
                         res.send('3' + err);
                       }  
                     });
 
                     //-------
                   } else{
+                    res.status(400);
                     res.send('4' + error);
                   }
                   filter.stopWatching();
@@ -152,6 +167,7 @@ app.post('/insure/:address/', function (req, res) {
         
       });
     } else {
+      res.status(400);
       res.send('5' + err);
     }  
   });
@@ -188,6 +204,7 @@ app.post('/claim/:address', function (req, res) {
       policyContract.claim(wearLevel, {gas: 200000, from: account}, function(err, result) {
         if(err) {
           console.log(err);
+          res.status(400);
           res.send('' + false);
         } else {
           var txId = result;
@@ -196,6 +213,7 @@ app.post('/claim/:address', function (req, res) {
         
       });
     } else {
+      res.status(400);
       res.send('' + false);
     }  
   });
@@ -204,6 +222,10 @@ app.post('/claim/:address', function (req, res) {
 app.get('/', function (req, res) {
   res.send('Welcome to API. Specs can be found: ');
 })
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+
+var server = https.createServer(options, app);
+
+server.listen(3000, function () {
+  console.log('Example app listening on port 3000 and https!')
 })
+
