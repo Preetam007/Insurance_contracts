@@ -13,8 +13,8 @@ app.use(require('helmet')()); // security for https
 
 // Set up express server here
 const options = {
-    cert: fs.readFileSync('./../sslcerts/fullchain.pem'),
-    key: fs.readFileSync('./../sslcerts/privkey.pem')
+    cert: fs.readFileSync('../../../../etc/letsencrypt/live/api.aigang.network/fullchain.pem'),
+    key: fs.readFileSync('../../../../etc/letsencrypt/live/api.aigang.network/privkey.pem')
 };
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
