@@ -62,7 +62,7 @@ Request body example:
 
 Response example:
 ```
-400000000 // amount in WEI
+0.023234
 ```
 <br/>
 <br/>
