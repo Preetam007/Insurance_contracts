@@ -89,7 +89,8 @@ app.post('/insurancePrice/:address', function (req, res) {
 app.get('/maxPayout', function (req, res) {
   var account = req.params.address;
   var result = policyContract.maxPayout.call();
-  res.send('' + result);
+  var payoutInEth = result / 1000000000000000000;
+  res.send('' + payoutInEth);
 })
 
 app.post('/insure/:address/', function (req, res) {
