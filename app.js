@@ -69,19 +69,19 @@ app.post('/register', function (req, res) {
             res.send(acc);
           } else {
             res.status(400);
-            res.send('' + false);
+            res.send('' + err);
           }  
         });
       }
       else {
         res.status(400);
-        res.send('' + false);
+        res.send('' + err);
       }    
     });
   }
   else {
     res.status(400);
-    res.send('' + false);
+    res.send('' + err);
   }
 });
 
