@@ -116,7 +116,7 @@ app.post('/insure/:address/', function (req, res) {
   web3.personal.unlockAccount(account, req.body.password, 2, function(err, result) {
     if(result) {
       policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
-        {value: policyMonthlyPayment, gas: 1000000, from: account}, 
+        {value: policyMonthlyPayment, gas: 200000, from: account}, 
        function(err, result) {
         if(err) {
           console.log(err);
