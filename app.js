@@ -13,8 +13,8 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 var fs = require('fs');
 var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
-// Insurance policy contract address
-var contractAddress = '0x8314335fc5905e40e8f23ff67c451efe7a365212';
+// Insurance policy contract address Ropsten testnet
+var contractAddress = '0x6db50e7f0f43dfea73395dd2c0c18a759dafc583';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
 var adminPass = 'adminPassword1234Temp';
@@ -32,7 +32,7 @@ app.post('/sendTestnetEthers/:address', function (req, res) {
     if(accResult) {    
     // unlocking admin account for ethers sending
       web3.personal.unlockAccount(adminAccount, adminPass, 4, function(err, adminAccResult) {
-        web3.eth.sendTransaction({value: 30000000000000000, 
+        web3.eth.sendTransaction({value: 10000000000000000, 
           gas: 2000000, from: adminAccount, to: account}, function(err, result) {
           if(err) {
             console.log(err);
@@ -82,7 +82,8 @@ app.post('/insurancePrice/:address', function (req, res) {
   var region = req.body.region;
 
   var result = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region);
-  res.send('' + result);
+  var priceInEth = result / 1000000000000000000;
+  res.send('' + priceInEth);
 })
 
 app.get('/maxPayout', function (req, res) {
@@ -103,7 +104,7 @@ app.post('/insure/:address/', function (req, res) {
   web3.personal.unlockAccount(account, req.body.password, 2, function(err, result) {
     if(result) {
       policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
-        {value: policyMonthlyPayment, gas: 2000000, from: account}, 
+        {value: policyMonthlyPayment, gas: 1000000, from: account}, 
        function(err, result) {
         if(err) {
           console.log(err);
@@ -200,7 +201,7 @@ app.post('/claim/:address', function (req, res) {
 })
 
 app.get('/', function (req, res) {
-  res.send('source');
+  res.send('Welcome to API. Specs can be found: ');
 })
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!')

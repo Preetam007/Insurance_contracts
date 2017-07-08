@@ -69,6 +69,8 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     insuranceParameters['deviceYear']['default'] = 140;
 
     // Battery wear level upper than
+    insuranceParameters['wearLevel']['50'] = 150;
+    insuranceParameters['wearLevel']['60'] = 140;
     insuranceParameters['wearLevel']['70'] = 120;
     insuranceParameters['wearLevel']['80'] = 110;
     insuranceParameters['wearLevel']['90'] = 100;
@@ -79,11 +81,11 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     insuranceParameters['region']['africa'] = 120;
     insuranceParameters['region']['default'] = 130;
 
-    // Base premium (0.02 ETH)
-    basePremium = 20000000000000000;
+    // Base premium (0.002 ETH)
+    basePremium = 2000000000000000;
 
-    // Max payout (0.4 ETH)
-    maxPayout = 400000000000000000;
+    // Max payout (0.04 ETH)
+    maxPayout = 40000000000000000;
 
     // Loading percentage (expenses, etc)
     loading = 50;
@@ -109,10 +111,24 @@ contract BatteryInsurancePolicy is PolicyInvestable {
 
   // More parameters should be included
   function policyPrice(string deviceBrand, string deviceYear, string wearLevel, string region) constant returns(uint price) {
-    uint deviceBrandMultiplier = insuranceParameters['deviceBrand'][deviceBrand];
-    uint deviceYearMultiplier = insuranceParameters['deviceYear'][deviceYear];
-    uint batteryWearLevelMultiplier = insuranceParameters['wearLevel'][wearLevel];
-    uint regionMultiplier = insuranceParameters['region'][region];
+    // set defaults
+    uint deviceBrandMultiplier = insuranceParameters['deviceBrand']['default'];
+    uint deviceYearMultiplier = insuranceParameters['deviceYear']['default'];
+    uint batteryWearLevelMultiplier = insuranceParameters['wearLevel']['default'];
+    uint regionMultiplier = insuranceParameters['region']['default'];
+
+    if(insuranceParameters['deviceBrand'][deviceBrand] != 0) {
+      deviceBrandMultiplier = insuranceParameters['deviceBrand'][deviceBrand];
+    }
+    if(insuranceParameters['deviceYear'][deviceYear] != 0) {
+      deviceYearMultiplier = insuranceParameters['deviceYear'][deviceYear];
+    }
+    if(insuranceParameters['wearLevel'][wearLevel] != 0) {
+      batteryWearLevelMultiplier = insuranceParameters['wearLevel'][wearLevel];
+    }
+    if(insuranceParameters['region'][region] != 0) {
+      deviceBrandMultiplier = insuranceParameters['region'][region];
+    }
 
     // / 100 is due to Solidity not supporting doubles
     uint riskPremium = basePremium * deviceBrandMultiplier / 100 * deviceYearMultiplier / 100 
