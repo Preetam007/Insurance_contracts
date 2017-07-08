@@ -19,7 +19,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   uint loading;
 
   // Owner is used to confirm policies and claims which came via our server
-  address owner;
+  address owner = 0x2033d81c062dE642976300c6eabCbA149e4372BE;
 
   event Insured(string deviceName, uint insurancePrice);
   event Claimed(uint payout); 
@@ -49,8 +49,6 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     totalInvestorsCount++;
     totalInvestedAmount = totalInvestedAmount + msg.value;
     Invested(msg.value);
-
-    owner = msg.sender;
 
     setInitialInsuranceParameters();
   }
