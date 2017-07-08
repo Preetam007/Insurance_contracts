@@ -40,7 +40,7 @@ app.post('/sendTestnetEthers/:address', function (req, res) {
     if(accResult) {    
     // unlocking admin account for ethers sending
       web3.personal.unlockAccount(adminAccount, adminPass, 4, function(err, adminAccResult) {
-        web3.eth.sendTransaction({value: 10000000000000000, 
+        web3.eth.sendTransaction({value: 100000000000000000, 
           gas: 2000000, from: adminAccount, to: account}, function(err, result) {
           if(err) {
             console.log(err);
