@@ -37,7 +37,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   }
 
   struct DeviceData {
-    uint itemId;
+    string itemId;
     string deviceBrand;
     string deviceYear;
     string batteryWearLevel;
@@ -139,7 +139,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   }
 
 
-  function insure(uint itemId, string deviceBrand, string deviceYear, string wearLevel, string region) payable returns (bool insured) {
+  function insure(string itemId, string deviceBrand, string deviceYear, string wearLevel, string region) payable returns (bool insured) {
     uint totalPrice = policyPrice(deviceBrand, deviceYear, wearLevel, region);
     uint monthlyPayment = totalPrice / 12;
     if (msg.value < monthlyPayment) {
