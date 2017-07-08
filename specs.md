@@ -30,7 +30,7 @@ Response example:
 <br/>
 <br/>
 <b>3. Send testnet Ethers.</b><br/>
-Method type: GET <br/>
+Method type: POST <br/>
 URL: sendTestnetEthers/:address <br/>
 Request body example:
 
