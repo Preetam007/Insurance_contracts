@@ -124,45 +124,66 @@ app.post('/insure/:address/', function (req, res) {
           res.send('1' + err);
         } else {
           var txIdinsure = result;
-
-          let filter = web3.eth.filter('latest')
-          filter.watch(function(error, result) {
-            console.log(error);
-            if (!error) {
-              let confirmedBlock = web3.eth.getBlock(web3.eth.blockNumber - 1)
-              if (confirmedBlock.transactions.length > 0) {
-                  let transaction = web3.eth.getTransaction(txIdinsure);
-                  if (transaction.from == account) {
-
-                    //---- confirmation transaction is needed from OWNER , TODO: refactor it and move to other file
-
-                    web3.personal.unlockAccount(adminAccount, adminPass, 2, function(err, result) {
-                      if(result) {    
-                        policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
-                          if(err) {
-                            console.log(err);
-                            res.status(400);
-                            res.send('2' + err);
-                          } else {
-                            res.send(txIdinsure);
-                          }
-                          
-                        });
-                      } else {
-                        res.status(400);
-                        res.send('3' + err);
-                      }  
-                    });
-
-                    //-------
-                  } else{
-                    res.status(400);
-                    res.send('4' + error);
-                  }
-                  filter.stopWatching();
-              }
+          res.send(txIdinsure);
+          // Claim 
+          web3.personal.unlockAccount(adminAccount, adminPass, 2, function(err, result) {
+            if(result) {    
+              policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
+                if(err) {
+                  console.log(err);
+                  // res.status(400);
+                  // res.send('2' + err);
+                } else {
+                  // res.send(txIdinsure);
+                }
+                
+              });
+            } else {
+              // res.status(400);
+              // res.send('3' + err);
             }
           });
+
+
+
+          // let filter = web3.eth.filter('latest')
+          // filter.watch(function(error, result) {
+          //   console.log(error);
+          //   if (!error) {
+          //     let confirmedBlock = web3.eth.getBlock(web3.eth.blockNumber - 1)
+          //     if (confirmedBlock.transactions.length > 0) {
+          //         let transaction = web3.eth.getTransaction(txIdinsure);
+          //         if (transaction.from == account) {
+
+          //           //---- confirmation transaction is needed from OWNER , TODO: refactor it and move to other file
+
+          //           web3.personal.unlockAccount(adminAccount, adminPass, 2, function(err, result) {
+          //             if(result) {    
+          //               policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
+          //                 if(err) {
+          //                   console.log(err);
+          //                   res.status(400);
+          //                   res.send('2' + err);
+          //                 } else {
+          //                   res.send(txIdinsure);
+          //                 }
+                          
+          //               });
+          //             } else {
+          //               res.status(400);
+          //               res.send('3' + err);
+          //             }  
+          //           });
+
+          //           //-------
+          //         } else{
+          //           res.status(400);
+          //           res.send('4' + error);
+          //         }
+          //         filter.stopWatching();
+          //     }
+          //   }
+          // });
         }
         
       });
