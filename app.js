@@ -14,7 +14,7 @@ var fs = require('fs');
 var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address
-var contractAddress = '0x3da52a228c20f62320b5b1b9b7dcc2d1ba777c2c';
+var contractAddress = '0x8314335fc5905e40e8f23ff67c451efe7a365212';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
 var adminPass = 'adminPassword1234Temp';
@@ -98,8 +98,8 @@ app.post('/insure/:address/', function (req, res) {
   var deviceYear = req.body.deviceYear;
   var wearLevel = req.body.wearLevel;
   var region = req.body.region;
-  var policyMonthlyPayment = policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region) / 12;
-
+  var policyMonthlyPayment = Math.round(policyContract.policyPrice(deviceBrand, deviceYear, wearLevel, region) / 12);
+  console.log(itemId + '' + deviceBrand+ '' + deviceYear+ '' +region + '' + policyMonthlyPayment);
   web3.personal.unlockAccount(account, req.body.password, 2, function(err, result) {
     if(result) {
       policyContract.insure(itemId, deviceBrand, deviceYear, wearLevel, region, 
@@ -107,9 +107,9 @@ app.post('/insure/:address/', function (req, res) {
        function(err, result) {
         if(err) {
           console.log(err);
-          res.send('' + false);
+          res.send('1' + err);
         } else {
-          var txId = result;
+          var txIdinsure = result;
 
           let filter = web3.eth.filter('latest')
           filter.watch(function(error, result) {
@@ -117,14 +117,30 @@ app.post('/insure/:address/', function (req, res) {
             if (!error) {
               let confirmedBlock = web3.eth.getBlock(web3.eth.blockNumber - 1)
               if (confirmedBlock.transactions.length > 0) {
-                  let transaction = web3.eth.getTransaction(txId);
+                  let transaction = web3.eth.getTransaction(txIdinsure);
                   if (transaction.from == account) {
 
-                    // confirmation transaction is needed from OWNER
+                    //---- confirmation transaction is needed from OWNER , TODO: refactor it and move to other file
 
-                    res.send(txId);
+                    web3.personal.unlockAccount(adminAccount, adminPass, 2, function(err, result) {
+                      if(result) {    
+                        policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
+                          if(err) {
+                            console.log(err);
+                            res.send('2' + err);
+                          } else {
+                            res.send(txIdinsure);
+                          }
+                          
+                        });
+                      } else {
+                        res.send('3' + err);
+                      }  
+                    });
+
+                    //-------
                   } else{
-                    res.send('' + false);
+                    res.send('4' + error);
                   }
                   filter.stopWatching();
               }
@@ -134,7 +150,7 @@ app.post('/insure/:address/', function (req, res) {
         
       });
     } else {
-      res.send('' + false);
+      res.send('5' + err);
     }  
   });
 })

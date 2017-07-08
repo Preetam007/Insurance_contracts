@@ -89,9 +89,9 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     loading = 50;
   }
 
-  // fallback functon, send all ethers as investment
+  // fallback functon not to take ethers
   function() payable { 
-    this.invest();
+    throw;
   }
 
   function invest() payable returns (bool success) {
@@ -151,9 +151,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   function claim(uint wearLevel) returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
-    if(wearLevel > 70 || userPolicy.endDateTimestamp == 0 || userPolicy.claimed || userPolicy.endDateTimestamp < now || insurancePolicies[msg.sender].confirmed) {
-      throw;
-    } else {
+    if(wearLevel < 70 && userPolicy.endDateTimestamp != 0 && !userPolicy.claimed && userPolicy.endDateTimestamp > now && insurancePolicies[msg.sender].confirmed) {
       if(this.balance > userPolicy.maxPayout) {
         msg.sender.transfer(userPolicy.maxPayout);
         userPolicy.claimed = true;
@@ -164,8 +162,10 @@ contract BatteryInsurancePolicy is PolicyInvestable {
         Claimed(userPolicy.maxPayout);
         return true;
       }
-      // Due to proposed model this should never happen
+      // Due to proposed statisticl model in production app this should never happen
       return false;
+    } else {
+      throw;
     }
   }
 
