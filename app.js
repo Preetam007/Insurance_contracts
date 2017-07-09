@@ -22,7 +22,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address Ropsten testnet
-var contractAddress = '0xf3cc9c66983b1276cacb93f2d9f5a3e113aff6aa';
+var contractAddress = '0x5B5bada28443c00c9b8419ecf172B93B004a6F37';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
 var adminPass = 'adminPassword1234Temp';
@@ -163,27 +163,7 @@ app.post('/insure/:address/', function (req, res) {
               }
             }
           });
-
-          // Insure confirmation
-          // web3.personal.unlockAccount(adminAccount, adminPass, 2, function(err, result) {
-          //   if(result) {    
-          //     policyContract.confirmPolicy(account, {gas: 200000, from: adminAccount}, function(err, result) {
-          //       if(err) {
-          //         console.log(err);
-          //         // res.status(400);
-          //         // res.send('2' + err);
-          //       } else {
-          //         // res.send(txIdinsure);
-          //       }
-                
-          //     });
-          //   } else {
-          //     // res.status(400);
-          //     // res.send('3' + err);
-          //   }
-          // });
         }
-        
       });
     } else {
       res.status(400);
