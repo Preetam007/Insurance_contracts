@@ -8,7 +8,8 @@ URL: /register<br/>
 Request body example:
 ```
 {
-	"password": "0a2i84a..." // password hash
+	"password": "0a2i84a...", // password hash
+	"apiKey": "1a1" // api key
 }
 ```
 Response example:
@@ -36,7 +37,8 @@ Request body example:
 
 ```
 {
-  "password": "334fmekrmm43534" // password hash
+  "password": "334fmekrmm43534", // password hash
+  "apiKey": "1a1" // api key
 }
 ```
 
@@ -74,6 +76,7 @@ Request body example:
 ```
 {
   "password": "334fmekrmm43534", // password hash
+  "apiKey": "1a1", // api key
   "itemId": "112312132",
   "deviceBrand": "apple",
   "deviceYear": "2015",
@@ -135,7 +138,8 @@ Request body example:
 ```
 {
   "wearLevel": "30",
-  "password": "334fmekrmm43534" // password hash
+  "password": "334fmekrmm43534", // password hash
+  "apiKey": "1a1" // api key
 }
 ```
 
