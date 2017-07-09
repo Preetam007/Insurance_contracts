@@ -25,8 +25,8 @@ var abiArray = obj.abi;
 var contractAddress = '0x5B5bada28443c00c9b8419ecf172B93B004a6F37';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
-var adminPass = 'adminPassword1234Temp';
-var apiKey = '1a1';
+var adminPass = '';
+var apiKey = '';
 
 app.get('/balance/:address', function (req, res) {
   var balance = web3.eth.getBalance(req.params.address).toNumber()
