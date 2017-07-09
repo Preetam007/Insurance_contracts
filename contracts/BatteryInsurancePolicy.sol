@@ -82,8 +82,8 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     // Base premium (0.001 ETH)
     basePremium = 1000000000000000;
 
-    // Max payout (0.008 ETH)
-    maxPayout = 8000000000000000;
+    // Max payout (0.01 ETH)
+    maxPayout = 10000000000000000;
 
     // Loading percentage (expenses, etc)
     loading = 50;
