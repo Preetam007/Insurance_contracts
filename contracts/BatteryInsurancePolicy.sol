@@ -79,11 +79,11 @@ contract BatteryInsurancePolicy is PolicyInvestable {
     insuranceParameters['region']['africa'] = 120;
     insuranceParameters['region']['default'] = 130;
 
-    // Base premium (0.002 ETH)
-    basePremium = 2000000000000000;
+    // Base premium (0.001 ETH)
+    basePremium = 1000000000000000;
 
-    // Max payout (0.04 ETH)
-    maxPayout = 40000000000000000;
+    // Max payout (0.008 ETH)
+    maxPayout = 8000000000000000;
 
     // Loading percentage (expenses, etc)
     loading = 50;
@@ -165,7 +165,7 @@ contract BatteryInsurancePolicy is PolicyInvestable {
   function claim(uint wearLevel) returns (bool) {
     var userPolicy = insurancePolicies[msg.sender];
 
-    if(wearLevel < 70 && userPolicy.endDateTimestamp != 0 && !userPolicy.claimed && userPolicy.endDateTimestamp > now && insurancePolicies[msg.sender].confirmed) {
+    if(wearLevel < 70 && userPolicy.endDateTimestamp != 0 && !userPolicy.claimed && userPolicy.endDateTimestamp > now && userPolicy.confirmed) {
       if(this.balance > userPolicy.maxPayout) {
         msg.sender.transfer(userPolicy.maxPayout);
         userPolicy.claimed = true;
