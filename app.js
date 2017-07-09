@@ -22,7 +22,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 var obj = JSON.parse(fs.readFileSync('./build/contracts/BatteryInsurancePolicy.json', 'utf8'));
 var abiArray = obj.abi;
 // Insurance policy contract address Ropsten testnet
-var contractAddress = '0x9a0bb6c09de54b57e572ae3a492ce28bb363e249';
+var contractAddress = '0x554ab5f5fe7006223c2dd321b420e9a05d48ec93';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
 var adminPass = '';
