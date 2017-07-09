@@ -26,6 +26,7 @@ var contractAddress = '0x5B5bada28443c00c9b8419ecf172B93B004a6F37';
 var policyContract = web3.eth.contract(abiArray).at(contractAddress);
 var adminAccount = '0x2033d81c062de642976300c6eabcba149e4372be';
 var adminPass = 'adminPassword1234Temp';
+var apiKey = '1a1';
 
 app.get('/balance/:address', function (req, res) {
   var balance = web3.eth.getBalance(req.params.address).toNumber()
@@ -35,6 +36,14 @@ app.get('/balance/:address', function (req, res) {
 
 app.post('/sendTestnetEthers/:address', function (req, res) {
   var account = req.params.address;
+  var receivedApiKey = req.body.apiKey;
+
+  if(receivedApiKey != apiKey) {
+    res.status(401);
+    res.send();
+
+    return;
+  }
 
   web3.personal.unlockAccount(account, req.body.password, 4, function(err, accResult) {
     if(accResult) {    
@@ -59,6 +68,15 @@ app.post('/sendTestnetEthers/:address', function (req, res) {
 })
 
 app.post('/register', function (req, res) {
+  var receivedApiKey = req.body.apiKey;
+
+  if(receivedApiKey != apiKey) {
+    res.status(401);
+    res.send();
+
+    return;
+  }
+
   // password hash
   if(req.body.password) {
       // Password should be used the one provided by user and secured
@@ -105,6 +123,16 @@ app.get('/maxPayout', function (req, res) {
 })
 
 app.post('/insure/:address/', function (req, res) {
+  var receivedApiKey = req.body.apiKey;
+
+  if(receivedApiKey != apiKey) {
+    res.status(401);
+    res.send();
+
+    return;
+  }
+
+
   var account = req.params.address;
   var itemId = req.body.itemId;
   var deviceBrand = req.body.deviceBrand;
@@ -195,6 +223,15 @@ app.get('/claimed/:address', function (req, res) {
 
 // Not secure, it should come trusted authority, probably as an Oracle directly to smart contract
 app.post('/claim/:address', function (req, res) {
+  var receivedApiKey = req.body.apiKey;
+
+  if(receivedApiKey != apiKey) {
+    res.status(401);
+    res.send();
+
+    return;
+  }
+
   var account = req.params.address;
   var wearLevel = req.body.wearLevel;
 
